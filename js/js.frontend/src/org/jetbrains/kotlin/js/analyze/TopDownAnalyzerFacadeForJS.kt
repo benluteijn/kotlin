@@ -45,12 +45,18 @@ object TopDownAnalyzerFacadeForJS {
     ): JsAnalysisResult {
 
         val moduleName = configuration[CommonConfigurationKeys.MODULE_NAME]!!
-        val context = ContextForNewModule(ProjectContext(project), Name.special("<$moduleName>"), JsPlatform.builtIns, null)
+
+        // In old JS backend, builtins should be the same in all dependency modules (see JsConfig), so taking the first one is OK.
+        // In other scenarios, the first module should be the standard library.
+        val builtIns = moduleDescriptors.firstOrNull()?.builtIns ?: JsPlatform.builtIns
+        val context = ContextForNewModule(ProjectContext(project), Name.special("<$moduleName>"), builtIns, null)
+
+        val dependencies =
+            if (builtIns.builtInsModule in moduleDescriptors) moduleDescriptors
+            else moduleDescriptors + builtIns.builtInsModule
 
         context.module.setDependencies(
-            listOf(context.module) +
-                    moduleDescriptors +
-                    listOf(JsPlatform.builtIns.builtInsModule),
+            listOf(context.module) + dependencies,
             friendModuleDescriptors.toSet()
         )
 
