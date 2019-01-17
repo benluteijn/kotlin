@@ -19,6 +19,8 @@ package org.jetbrains.kotlin.backend.common.bridges
 import org.jetbrains.kotlin.descriptors.CallableMemberDescriptor
 import org.jetbrains.kotlin.descriptors.FunctionDescriptor
 import org.jetbrains.kotlin.descriptors.Modality
+import org.jetbrains.kotlin.renderer.DescriptorRenderer
+import org.jetbrains.kotlin.resolve.DescriptorEquivalenceForOverrides
 import org.jetbrains.kotlin.resolve.DescriptorUtils
 import org.jetbrains.kotlin.resolve.OverridingUtil
 import org.jetbrains.kotlin.resolve.calls.callResolverUtil.isOrOverridesSynthesized
@@ -60,6 +62,10 @@ open class DescriptorBasedFunctionHandle(val descriptor: FunctionDescriptor) : F
 
     override val isDeclaration: Boolean = descriptor.kind.isReal || findInterfaceImplementation(descriptor) != null
 
+    private val hashCode by lazy(LazyThreadSafetyMode.NONE) {
+        DescriptorRenderer.FQ_NAMES_IN_TYPES.render(descriptor).hashCode()
+    }
+
     override val isAbstract: Boolean =
         descriptor.modality == Modality.ABSTRACT
 
@@ -68,12 +74,10 @@ open class DescriptorBasedFunctionHandle(val descriptor: FunctionDescriptor) : F
 
     override fun getOverridden() = _overridden
 
-    override fun hashCode(): Int {
-        return descriptor.hashCode()
-    }
+    override fun hashCode(): Int = hashCode
 
     override fun equals(other: Any?): Boolean {
-        return other is DescriptorBasedFunctionHandle && descriptor == other.descriptor
+        return other is DescriptorBasedFunctionHandle && DescriptorEquivalenceForOverrides.areEquivalent(descriptor, other.descriptor)
     }
 
     override fun toString(): String {

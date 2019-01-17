@@ -13884,6 +13884,11 @@ public class LightAnalysisModeTestGenerated extends AbstractLightAnalysisModeTes
             runTest("compiler/testData/codegen/box/jvm8/simpleProperty.kt");
         }
 
+        @TestMetadata("treeMapBridge.kt")
+        public void testTreeMapBridge() throws Exception {
+            runTest("compiler/testData/codegen/box/jvm8/treeMapBridge.kt");
+        }
+
         @TestMetadata("compiler/testData/codegen/box/jvm8/defaults")
         @TestDataPath("$PROJECT_ROOT")
         @RunWith(JUnit3RunnerWithInners.class)
