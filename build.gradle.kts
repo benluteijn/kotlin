@@ -808,20 +808,27 @@ allprojects {
     }
 }
 
-val ideaVersion = findProperty("versions.intellijSdk").toString()
 val ideaSdkPath: String
-    get() = "${rootProject.projectDir}/buildSrc/prepare-deps/intellij-sdk/build/repo/kotlin.build.custom.deps/$ideaVersion/intellij"
+    get() = IntellijRootUtils.getIntellijRootDir(rootProject).absolutePath
 
+// todo: use buildsrc/tasks.kt
 fun org.jetbrains.gradle.ext.JUnit.configureForKotlin() {
     vmParameters = listOf(
         "-ea",
         "-XX:+HeapDumpOnOutOfMemoryError",
-        "-Xmx1024m",
+        "-Xmx1600m",
         "-XX:+UseCodeCacheFlushing",
         "-XX:ReservedCodeCacheSize=128m",
         "-Djna.nosys=true",
-        "-Didea.home.path=$ideaSdkPath"
+        "-Didea.is.unit.test=true",
+        "-Didea.home.path=$ideaSdkPath",
+        "-Djps.kotlin.home=$ideaPluginDir",
+        "-Dkotlin.ni=" + if (rootProject.hasProperty("newInferenceTests")) "true" else "false"
     ).joinToString(" ")
+    envs = mapOf(
+        "NO_FS_ROOTS_ACCESS_CHECK" to "true",
+        "PROJECT_CLASSES_DIRS" to "out/test/org.jetbrains.kotlin.compiler.test"
+    )
     workingDirectory = rootDir.toString()
 }
 
@@ -856,8 +863,9 @@ if (isJpsBuildEnabled && System.getProperty("idea.active") != null) {
 
                     runConfigurations {
                         application("[JPS] IDEA") {
+                            // todo: use buildsrc/intellijDependencies.kt
                             moduleName = "org.jetbrains.kotlin.idea-runner.main"
-                            workingDirectory = ideaSdkPath
+                            workingDirectory = File(intellijRootDir(), "bin").toString()
                             mainClass = "com.intellij.idea.Main"
                             jvmArgs = listOf(
                                 "-Xmx1250m",
@@ -871,7 +879,7 @@ if (isJpsBuildEnabled && System.getProperty("idea.active") != null) {
                                 "-Dapple.laf.useScreenMenuBar=true",
                                 "-Dapple.awt.graphics.UseQuartz=true",
                                 "-Dsun.io.useCanonCaches=false",
-                                "-Dplugin.path=$ideaPluginDir"
+                                "-Dplugin.path=${ideaPluginDir}"
                             ).joinToString(" ")
                         }
 
