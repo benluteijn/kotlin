@@ -72,6 +72,32 @@ class KaptIncrementalIT : BaseGradleIT() {
     }
 
     @Test
+    fun testCompileError() {
+        val project = getProject()
+        val options = defaultBuildOptions().copy(kotlinDaemonDebugPort = null)
+
+        project.build("build", options = options) {
+            assertSuccessful()
+        }
+
+        val bKt = project.projectDir.getFileByName("B.kt")
+        val errorKt = bKt.resolveSibling("error.kt")
+        errorKt.writeText("<COMPILE_ERROR_MARKER>")
+
+        project.build("build", options = options) {
+            assertFailed()
+        }
+
+        errorKt.delete()
+        bKt.modify { "$it\n" }
+        project.build("build", options = options) {
+            assertSuccessful()
+            assertCompiledKotlinSources(project.relativize(bKt))
+            assertTasksExecuted(":kaptGenerateStubsKotlin", ":compileKotlin")
+        }
+    }
+
+    @Test
     fun testChangeFunctionBodyWithoutChangingSignature() {
         val project = getProject()
 
