@@ -36,6 +36,9 @@ class IncrementalCompilationJvmMultiProjectIT : BaseIncrementalCompilationMultiP
     override fun defaultProject(): Project =
         Project("incrementalMultiproject")
 
+    override val defaultGradleVersion: GradleVersionRequired
+        get() = GradleVersionRequired.Exact("5.0")
+
     // todo: do the same for js backend
     @Test
     fun testDuplicatedClass() {
