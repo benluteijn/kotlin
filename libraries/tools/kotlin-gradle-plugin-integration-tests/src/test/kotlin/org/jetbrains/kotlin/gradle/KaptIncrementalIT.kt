@@ -86,6 +86,7 @@ class KaptIncrementalIT : BaseGradleIT() {
 
         project.build("build", options = options) {
             assertFailed()
+            // todo assert kapt task failed
         }
 
         errorKt.delete()
