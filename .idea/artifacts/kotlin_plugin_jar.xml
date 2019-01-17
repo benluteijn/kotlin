@@ -25,7 +25,7 @@
       <element id="module-output" name="org.jetbrains.kotlin.frontend.main" />
       <element id="module-output" name="org.jetbrains.kotlin.ide-common.main" />
       <element id="module-output" name="org.jetbrains.kotlin.idea-core.main" />
-      <element id="module-output" name="org.jetbrains.kotlin.idea-formatter.main" />
+      <element id="module-output" name="org.jetbrains.kotlin.formatter.main" />
       <element id="module-output" name="org.jetbrains.kotlin.idea-gradle-native.main" />
       <element id="module-output" name="org.jetbrains.kotlin.idea-gradle.main" />
       <element id="module-output" name="org.jetbrains.kotlin.idea-native.main" />
