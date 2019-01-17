@@ -24,6 +24,8 @@ class IncrementalCompilationJsMultiProjectIT : BaseIncrementalCompilationMultiPr
 
     override val additionalLibDependencies: String =
         "implementation \"org.jetbrains.kotlin:kotlin-test-js:${'$'}kotlin_version\""
+
+
 }
 
 class IncrementalCompilationJvmMultiProjectIT : BaseIncrementalCompilationMultiProjectIT() {
@@ -53,6 +55,11 @@ class IncrementalCompilationJvmMultiProjectIT : BaseIncrementalCompilationMultiP
         }
     }
 
+
+    @Test
+    override fun testRemoveLibFromClasspath() {
+        super.testRemoveLibFromClasspath()
+    }
 
     // checks that multi-project ic is disabled when there is a task that outputs to javaDestination dir
     // that is not JavaCompile or KotlinCompile
