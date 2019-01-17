@@ -271,6 +271,10 @@ abstract class AbstractKotlinCompile<T : CommonCompilerArguments>() : AbstractKo
             outputFiles.keysToMap { it.readBytes() }
         } else null
 
+        if (!incremental) {
+            clearLocalStateDirectories("IC is disabled")
+        }
+
         try {
             executeImpl(inputs)
         } catch (t: Throwable) {
