@@ -38,11 +38,13 @@ abstract class IncrementalCompilerRunner<
     Args : CommonCompilerArguments,
     CacheManager : IncrementalCachesManager<*>
 >(
-    workingDir: File,
+    private val workingDir: File,
     cacheDirName: String,
     protected val reporter: ICReporter,
     private val buildHistoryFile: File,
-        private val localStateDirs: Collection<File> = emptyList()
+    // there might be some additional output directories (e.g. for generated java in kapt)
+    // to remove them correctly on rebuild, we pass them as additional argument
+    private val outputFiles: Collection<File> = emptyList()
 ) {
 
     protected val cacheDirectory = File(workingDir, cacheDirName)
@@ -67,19 +69,29 @@ abstract class IncrementalCompilerRunner<
 
         fun rebuild(reason: () -> String): ExitCode {
             reporter.report(reason)
+            caches.close(false)
 
-            caches.clean()
-            dirtySourcesSinceLastTimeFile.delete()
+            reporter.report { "Clearing output on rebuild" }
+            for (file in sequenceOf(destinationDir(args), workingDir) + outputFiles.asSequence()) {
+                val deleted: Boolean? = when {
+                    file.isDirectory -> {
+                        reporter.report { "Deleting $file" }
+                        file.deleteRecursively()
+                    }
+                    file.isFile -> {
+                        reporter.report { "Deleting $file" }
+                        file.delete()
+                    }
+                    else -> null
+                }
 
-            reporter.report { "Deleting output directories on rebuild:" }
-            for (dir in sequenceOf(destinationDir(args)) + localStateDirs.asSequence()) {
-                if (!dir.isDirectory) continue
-
-                dir.deleteRecursively()
-                dir.mkdirs()
-                reporter.report { "deleted $dir" }
+                if (deleted == false) {
+                    reporter.report { "Could not delete $file" }
+                }
             }
 
+            destinationDir(args).mkdirs()
+            workingDir.mkdirs()
             caches = createCacheManager(args)
             if (providedChangedFiles == null) {
                 caches.inputsCache.sourceSnapshotMap.compareAndUpdate(allSourceFiles)

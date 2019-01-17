@@ -26,6 +26,8 @@ import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.incremental.ChangedFiles
 import org.jetbrains.kotlin.gradle.internal.CompilerArgumentAwareWithInput
 import org.jetbrains.kotlin.gradle.internal.prepareCompilerArguments
+import org.jetbrains.kotlin.gradle.internal.tasks.TaskWithLocalState
+import org.jetbrains.kotlin.gradle.internal.tasks.allOutputFiles
 import org.jetbrains.kotlin.gradle.logging.GradlePrintingMessageCollector
 import org.jetbrains.kotlin.gradle.logging.kotlinDebug
 import org.jetbrains.kotlin.gradle.logging.kotlinWarn
@@ -45,7 +47,11 @@ const val KOTLIN_BUILD_DIR_NAME = "kotlin"
 const val USING_JVM_INCREMENTAL_COMPILATION_MESSAGE = "Using Kotlin/JVM incremental compilation"
 const val USING_JS_INCREMENTAL_COMPILATION_MESSAGE = "Using Kotlin/JS incremental compilation"
 
-abstract class AbstractKotlinCompileTool<T : CommonToolArguments>() : AbstractCompile(), CompilerArgumentAwareWithInput<T> {
+abstract class AbstractKotlinCompileTool<T : CommonToolArguments>
+    : AbstractCompile(),
+    CompilerArgumentAwareWithInput<T>,
+    TaskWithLocalState {
+
     private fun useCompilerClasspathConfigurationMessage(propertyName: String) {
         logger.kotlinWarn(
             "'$path.$propertyName' is deprecated and will be removed soon. " +
@@ -116,6 +122,8 @@ abstract class AbstractKotlinCompile<T : CommonCompilerArguments>() : AbstractKo
     @get:LocalState
     internal val taskBuildDirectory: File
         get() = File(File(project.buildDir, KOTLIN_BUILD_DIR_NAME), name)
+
+    override fun localStateDirectories(): FileCollection = project.files(taskBuildDirectory)
 
     // indicates that task should compile kotlin incrementally if possible
     // it's not possible when IncrementalTaskInputs#isIncremental returns false (i.e first build)
@@ -272,7 +280,7 @@ abstract class AbstractKotlinCompile<T : CommonCompilerArguments>() : AbstractKo
         } else null
 
         if (!incremental) {
-            clearLocalStateDirectories("IC is disabled")
+            clearLocalState("IC is disabled")
         }
 
         try {
@@ -449,7 +457,7 @@ open class KotlinCompile : AbstractKotlinCompile<K2JVMCompilerArguments>(), Kotl
 
         val environment = GradleCompilerEnvironment(
             computedCompilerClasspath, messageCollector, outputItemCollector,
-            localStateDirectories = localStateDirectories(),
+            outputFiles = allOutputFiles(),
             incrementalCompilationEnvironment = icEnv
         )
         compilerRunner.runJvmCompilerAsync(
@@ -606,7 +614,7 @@ open class Kotlin2JsCompile : AbstractKotlinCompile<K2JSCompilerArguments>(), Ko
 
         val environment = GradleCompilerEnvironment(
             computedCompilerClasspath, messageCollector, outputItemCollector,
-            localStateDirectories = localStateDirectories(),
+            outputFiles = allOutputFiles(),
             incrementalCompilationEnvironment = icEnv
         )
         compilerRunner.runJsCompilerAsync(sourceRoots.kotlinSourceFiles, commonSourceSet.toList(), args, environment)
