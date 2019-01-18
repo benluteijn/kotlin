@@ -8,7 +8,7 @@
       <element id="directory" name="META-INF">
         <element id="file-copy" path="$PROJECT_DIR$/prepare/idea-plugin/build/tmp/shadowJar/MANIFEST.MF" />
       </element>
-      <element id="extracted-dir" path="$PROJECT_DIR$/bootstrap/protobuf-java-relocated-2.6.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/protobuf-relocated/2.6.1/512c19ed7e6f9b5ae47f7ee8d5b0e68a983e357b/protobuf-relocated-2.6.1.jar" path-in-jar="/" />
       <element id="module-output" name="org.jetbrains.kotlin.annotation-based-compiler-plugins-ide-support.main" />
       <element id="module-output" name="org.jetbrains.kotlin.backend-common.main" />
       <element id="module-output" name="org.jetbrains.kotlin.backend.main" />
