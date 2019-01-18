@@ -280,7 +280,7 @@ open class A {
     @Test
     open fun testRemoveLibFromClasspath() {
         val project = defaultProject()
-        project.debug("build") {
+        project.build("build") {
             assertSuccessful()
         }
 
@@ -290,7 +290,7 @@ open class A {
         val aaKt = project.projectDir.getFileByName("AA.kt")
         aaKt.addNewLine()
 
-        project.debug("build") {
+        project.build("build") {
             assertFailed()
         }
 
